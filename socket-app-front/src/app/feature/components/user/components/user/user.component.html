@@ -1,0 +1,118 @@
+<div class="container p-5">
+    <div class="row mb-5">
+      <button class="btn btn-outline-primary" (click)="open(content)"> Agregar </button>
+    </div>
+    <div class="row">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Firsname</th>
+            <th scope="col">City</th>
+            <th scope="col">Age</th>
+            <th scope="col">Active</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody *ngIf="users$ | async as data">
+          <tr *ngFor="let user of data.content | paginate: {  itemsPerPage: itemsPerPage, 
+                                                              currentPage: currentPage,
+                                                              totalItems: data.totalElements
+                                                            } ">
+            <td>{{ user.name }}</td>
+            <td>{{ user.lastName }}</td>
+            <td>{{ user.city }}</td>
+            <td>{{ user.age }}</td>
+            <td>
+              <span [ngClass]="{'badge':true, 'badge-success': user.active,'badge-danger': !user.active}">{{ user.active ?
+                'Active' : 'Disable'}}</span>
+            </td>
+            <td>
+              <button class="btn btn-warning" (click)="onEditar(content, user) "> Editar </button>
+              <button class="btn btn-danger ml-2" (click)="onOpenDeleteModal( content, user )"> Eliminar </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="row" style="justify-content: center">      
+      <pagination-controls  (pageChange)="currentPage = $event"  
+                            (pageChange)="onPageChanged($event)"
+                            screenReaderCurrentLabel="asd">
+      </pagination-controls>
+    </div>
+  </div>
+  
+  <ng-template #content let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">User</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <ngb-alert type="danger" class="w-100" *ngIf="isDelete">
+        ¿Desea eliminar este usuario?
+      </ngb-alert>
+      <form [formGroup]="userFormService.formGroup">
+        <div class="form-row">
+          <div class="col">
+            <label for="name">Name</label>
+            <div class="input-group" >
+              <input id="name" [ngClass]="{'form-control': true, 'input-invalid': userFormService.formGroup.get('name').hasError('required') && sent}" formControlName="name">
+              <div class="invalid-feedback" *ngIf="userFormService.formGroup.get('name').hasError('required') && sent">
+                The name is required
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <label for="lastname">Lastname</label>
+            <div class="input-group">
+              <input id="lastname" [ngClass]="{'form-control': true, 'input-invalid': userFormService.formGroup.get('lastName').hasError('required') && sent}" formControlName="lastName">
+              <div class="invalid-feedback" *ngIf="userFormService.formGroup.get('lastName').hasError('required') && sent">
+                The lastname is required
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col">
+            <label for="city">City</label>
+            <div class="input-group">
+              <input id="city" [ngClass]="{'form-control': true, 'input-invalid': userFormService.formGroup.get('city').hasError('required') && sent}" formControlName="city">
+              <div class="invalid-feedback" *ngIf="userFormService.formGroup.get('city').hasError('required') && sent">
+                The city is required
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <label for="age">Age</label>
+            <div class="input-group">
+              <input id="age" [ngClass]="{'form-control': true, 'input-invalid': (userFormService.formGroup.get('age').hasError('required') || userFormService.formGroup.get('age').hasError('min')) && sent }" type="number" formControlName="age">
+              <div class="invalid-feedback" *ngIf="userFormService.formGroup.get('age').hasError('required') && sent ">
+                Te age is required
+              </div>
+              <div class="invalid-feedback" *ngIf="userFormService.formGroup.get('age').hasError('min') && sent ">
+                Te minimun age is 1
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row mt-3">
+          <div class="col">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="active" formControlName="active">
+              <label class="form-check-label" for="active">Active</label>            
+            </div>
+  
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-danger" (click)="modal.dismiss('delete')" *ngIf="isDelete"> Delete </button>
+      <button type="button" class="btn btn-primary" (click)="onGuardar()" *ngIf="!isDelete">Save</button>
+      <button type="button" class="btn btn-outline-dark ml-3" (click)="onCancelar()"> cancel </button>
+    </div>
+  </ng-template>
